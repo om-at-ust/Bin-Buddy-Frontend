@@ -1,17 +1,21 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from '../context/AuthContext';
 
 function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [credentials, setCredentials] = useState({
     username: "",
     password: "",
   });
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     try {
       const response = await fetch("http://localhost:8081/api/auth/login", {
@@ -37,15 +41,18 @@ function Login() {
 
       const decodedToken = parseJwt(token);
       if (decodedToken) {
-        sessionStorage.setItem("user", JSON.stringify({
+        const userData = {
           username: decodedToken.sub,
-        }));
+        };
+        login(userData);
       }
 
       navigate("/");
     } catch (err) {
       setError("An error occurred during login");
       console.error("Login error:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 

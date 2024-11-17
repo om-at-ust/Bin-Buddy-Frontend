@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ClipLoader } from 'react-spinners';
-import { toast } from 'react-toastify';
-import axios from 'axios';
+import { useAuth } from '../context/AuthContext'; // Import auth context
 
 function Register() {
   const navigate = useNavigate();
+  const { login } = useAuth(); // Get login function from context
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -24,26 +24,83 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     
     // Basic validation
     if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords don't match!");
+      setError("Passwords don't match!");
       return;
     }
 
     setLoading(true);
     try {
-      // Replace with your actual API endpoint
-      const response = await axios.post('YOUR_API_URL/register', {
-        username: formData.username,
-        email: formData.email,
-        password: formData.password
+      // Register the user
+      const registerResponse = await fetch('http://localhost:8081/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password
+        }),
       });
 
-      toast.success('Registration successful!');
-      navigate('/login');
+      const registerData = await registerResponse.text();
+
+      if (!registerResponse.ok) {
+        throw new Error(registerData);
+      }
+
+      if (registerData.includes("username should be unique")) {
+        setError("Username is already taken");
+        return;
+      }
+
+      if (registerData.includes("email already exists")) {
+        setError("Email is already registered");
+        return;
+      }
+
+      // If registration successful, automatically login
+      const loginResponse = await fetch('http://localhost:8081/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password
+        }),
+      });
+
+      if (!loginResponse.ok) {
+        throw new Error('Auto-login failed');
+      }
+
+      const token = await loginResponse.text();
+
+      if (token === 'Login FAILED') {
+        throw new Error('Auto-login failed');
+      }
+
+      // Store token and user data
+      sessionStorage.setItem('jwtToken', token);
+      const userData = {
+        username: formData.username,
+      };
+      sessionStorage.setItem('user', JSON.stringify(userData));
+      
+      // Update auth context
+      login(userData);
+
+      // Navigate to home page
+      navigate('/');
+      
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Registration failed!');
+      console.error('Registration error:', error);
+      setError(error.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -56,6 +113,12 @@ function Register() {
           Create an Account
         </h2>
         
+        {error && (
+          <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+        
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="username" className="block text-sm font-medium text-gray-700">
@@ -67,8 +130,10 @@ function Register() {
               name="username"
               value={formData.username}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 p-2 border"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm 
+                focus:border-green-500 focus:ring-green-500 p-2 border"
               required
+              disabled={loading}
             />
           </div>
 
@@ -82,8 +147,10 @@ function Register() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 p-2 border"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm 
+                focus:border-green-500 focus:ring-green-500 p-2 border"
               required
+              disabled={loading}
             />
           </div>
 
@@ -97,8 +164,10 @@ function Register() {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 p-2 border"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm 
+                focus:border-green-500 focus:ring-green-500 p-2 border"
               required
+              disabled={loading}
             />
           </div>
 
@@ -112,33 +181,24 @@ function Register() {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 p-2 border"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm 
+                focus:border-green-500 focus:ring-green-500 p-2 border"
               required
+              disabled={loading}
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`w-full flex justify-center py-2 px-4 border border-transparent 
+              rounded-md shadow-sm text-sm font-medium text-white bg-green-600 
+              hover:bg-green-700 focus:outline-none focus:ring-2 
+              focus:ring-offset-2 focus:ring-green-500
+              ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            {loading ? (
-              <ClipLoader size={20} color="#ffffff" />
-            ) : (
-              'Register'
-            )}
+            {loading ? 'Creating Account...' : 'Register'}
           </button>
-
-          <div className="text-center text-sm text-gray-600">
-            Already have an account?{' '}
-            <button
-              type="button"
-              onClick={() => navigate('/login')}
-              className="text-green-600 hover:text-green-500"
-            >
-              Login here
-            </button>
-          </div>
         </form>
       </div>
     </div>
