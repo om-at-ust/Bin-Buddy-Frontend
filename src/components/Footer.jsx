@@ -6,7 +6,7 @@ function Footer() {
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-xl font-bold mb-4">WasteConnect</h3>
+            <h3 className="text-xl font-bold mb-4">Bin Buddy</h3>
             <p className="text-green-100">
               Making waste management smarter and more efficient for a cleaner
               tomorrow.
@@ -45,7 +45,7 @@ function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-4">Contact Us</h4>
             <ul className="space-y-2 text-green-100">
-              <li>Email: info@wasteconnect.com</li>
+              <li>Email: info@binbuddy.com</li>
               <li>Phone: (555) 123-4567</li>
               <li>Address: 123 Green Street</li>
             </ul>
@@ -90,7 +90,7 @@ function Footer() {
 
         <div className="border-t border-green-700 mt-8 pt-8 text-center text-green-100">
           <p>
-            &copy; {new Date().getFullYear()} WasteConnect. All rights reserved.
+            &copy; {new Date().getFullYear()} Bin Buddy. All rights reserved.
           </p>
         </div>
       </div>

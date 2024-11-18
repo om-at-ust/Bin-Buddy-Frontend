@@ -41,3 +41,21 @@ body {
   background-color: rgba(34, 197, 94, 0.2);
   color: inherit;
 }
+
+
+@layer components {
+  .nav-link {
+    @apply flex flex-col items-center text-sm font-medium transition-colors duration-300;
+  }
+}
+
+/* Add smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Add a backdrop blur effect when navbar is scrolled */
+.scrolled {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
