@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import logo from "../assets/Logos/Light.png";
+// import logo from "../assets/Logos/Light.png";
 import {
   Menu,
   X,
@@ -11,13 +11,27 @@ import {
   LogOut,
   User,
   Leaf,
+  LayoutDashboard,
 } from "lucide-react";
+import { getUserRole } from "../services/authService";
 
 function Navbar() {
   const { isLoggedIn, username, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
+
+  useEffect(() => {
+    const checkUserRole = async () => {
+      if (username) {
+        const role = await getUserRole(username);
+        setIsAdmin(role === "ADMIN");
+      }
+    };
+
+    checkUserRole();
+  }, [username]);
 
   const handleLogout = () => {
     logout();
@@ -34,10 +48,14 @@ function Navbar() {
         <div className="flex justify-between h-16 items-center">
           {/* Logo Section */}
           <Link to="/" className="flex items-center space-x-3 group">
-            <div className="p-2 rounded-xl bg-white/80 group-hover:bg-white 
-              transition-all duration-300 shadow-sm">
-              <Leaf className="h-8 w-8 text-green-600 
-                group-hover:scale-110 transition-transform duration-300" />
+            <div
+              className="p-2 rounded-xl bg-white/80 group-hover:bg-white 
+              transition-all duration-300 shadow-sm"
+            >
+              <Leaf
+                className="h-8 w-8 text-green-600 
+                group-hover:scale-110 transition-transform duration-300"
+              />
             </div>
             <span className="font-extrabold text-2xl tracking-wider text-gray-800">
               Bin Buddy
@@ -55,6 +73,18 @@ function Navbar() {
               <Home className="w-5 h-5 mb-1" />
               <span>Home</span>
             </Link>
+
+            {isAdmin && (
+              <Link
+                to="/admin/dashboard"
+                className={`nav-link group flex flex-col items-center 
+                  text-gray-600 hover:text-green-700 transition-colors duration-300
+                  ${isActiveLink("/dashboard") && "text-green-700 font-semibold"}`}
+              >
+                <LayoutDashboard className="w-5 h-5 mb-1" />
+                <span>Dashboard</span>
+              </Link>
+            )}
 
             <Link
               to="/raise-issue"
@@ -143,7 +173,18 @@ function Navbar() {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100">
           <div className="px-4 py-6 space-y-4">
-            {/* ... Mobile menu content remains the same ... */}
+            {/* Add Dashboard link to mobile menu if admin */}
+            {isAdmin && (
+              <Link
+                to="/dashboard"
+                className="flex items-center space-x-2 text-gray-600 hover:text-green-700"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <LayoutDashboard className="w-5 h-5" />
+                <span>Dashboard</span>
+              </Link>
+            )}
+            {/* ... other mobile menu items ... */}
           </div>
         </div>
       )}

@@ -19,7 +19,24 @@ function AdminLogin() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8222/api/auth/login", {
+      const username = formatUsername(credentials.username);
+      
+      if (!isValidUsername(username)) {
+        setError("Please enter a valid username");
+        setIsLoading(false);
+        return;
+      }
+
+      const isAdmin = await checkUserRole(username);
+      console.log('Is admin:', isAdmin); // For debugging
+
+      if (!isAdmin) {
+        setError("Access denied: Admin privileges required");
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await fetch("http://localhost:8081/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -71,6 +88,65 @@ function AdminLogin() {
       return JSON.parse(atob(token.split(".")[1]));
     } catch (e) {
       return null;
+    }
+  };
+
+  // Validate username format
+  const isValidUsername = (username) => {
+    return username && username.length >= 3; // Add your validation rules
+  };
+
+  // Clean and format username
+  const formatUsername = (username) => {
+    return username.trim().toLowerCase();
+  };
+
+  // Use in handleSubmit
+  const checkUserRole = async (username) => {
+    try {
+      const encodedUsername = encodeURIComponent(username);
+      
+      const response = await fetch(`http://localhost:8081/api/auth/getRole/${encodedUsername}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+      // Log response status and headers for debugging
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
+      if (!response.ok) {
+        switch (response.status) {
+          case 404:
+            throw new Error('User not found');
+          case 400:
+            throw new Error('Invalid username format');
+          case 403:
+            throw new Error('Access forbidden');
+          default:
+            throw new Error('Failed to fetch user role');
+        }
+      }
+
+      const role = await response.text();
+      console.log('Role received:', role);
+
+      if (!role || role.trim() === '') {
+        console.log('No role received');
+        return false;
+      }
+
+      const isAdmin = role.toLowerCase().trim() === 'admin';
+      console.log('Is admin:', isAdmin);
+      return isAdmin;
+
+    } catch (error) {
+      console.error('Role check error:', error);
+      setError(`Role verification failed: ${error.message}`);
+      return false;
     }
   };
 
