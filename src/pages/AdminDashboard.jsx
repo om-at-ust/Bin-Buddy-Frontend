@@ -48,7 +48,7 @@ function AdminDashboard() {
             <NavItem
               icon={<Truck />}
               label="Fleet Management"
-              to="/admin/fleet"
+              to="/fleet-management"
             />
             <NavItem
               icon={<Users />}

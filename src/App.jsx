@@ -8,12 +8,16 @@ import AdminLogin from "./components/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import BinManagement from "./pages/BinManagement";
 import RouteManagement from "./pages/RouteManagement";
+import { Toaster } from "react-hot-toast";
+import FleetManagement from "./pages/FleetManagement";
+
 function App() {
   return (
     <AuthProvider>
       <Router>
         <div className="min-h-screen">
           <Navbar />
+          <Toaster />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -23,6 +27,7 @@ function App() {
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/bin-management" element={<BinManagement />} />
             <Route path="/route-management" element={<RouteManagement />} />
+            <Route path="/fleet-management" element={<FleetManagement />} />
           </Routes>
         </div>
       </Router>

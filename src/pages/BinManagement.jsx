@@ -1,9 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Search, Edit2, Trash2, MapPin, AlertCircle, Truck } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Edit2,
+  Trash2,
+  MapPin,
+  AlertCircle,
+  Truck,
+} from "lucide-react";
 import BinModal from "../components/bins/BinModal";
 import BinMap from "../components/bins/BinMap";
-import { fetchBins, deleteBin, getFullOrOverflowingBins, generateRoute } from "../services/binService";
+import {
+  fetchBins,
+  deleteBin,
+  getFullOrOverflowingBins,
+  generateRoute,
+} from "../services/binService";
 import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 function BinManagement() {
   const [bins, setBins] = useState([]);
@@ -14,7 +28,7 @@ function BinManagement() {
   const [showOnlyFull, setShowOnlyFull] = useState(false);
   const [isGeneratingRoute, setIsGeneratingRoute] = useState(false);
   const [routeData, setRouteData] = useState(null);
-
+  const navigate = useNavigate();
   useEffect(() => {
     loadBins();
   }, []);
@@ -58,12 +72,11 @@ function BinManagement() {
   const handleGenerateRoute = async () => {
     try {
       setIsGeneratingRoute(true);
-      const response = await generateRoute();
-      setRouteData(response);
-      toast.success('Route generated successfully!');
+      await generateRoute();
+      toast.success("Route generated successfully!");
+      navigate("/route-management");
     } catch (error) {
-      console.error('Error generating route:', error);
-      toast.error('Failed to generate route');
+      toast.error(error.message || "Failed to generate route");
     } finally {
       setIsGeneratingRoute(false);
     }
@@ -109,7 +122,7 @@ function BinManagement() {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => showOnlyFull ? loadBins() : loadFullBins()}
+            onClick={() => (showOnlyFull ? loadBins() : loadFullBins())}
             className={`px-4 py-2 rounded-lg ${
               showOnlyFull
                 ? "bg-red-50 text-red-600 border border-red-200"
@@ -125,9 +138,10 @@ function BinManagement() {
               onClick={handleGenerateRoute}
               disabled={isGeneratingRoute}
               className={`px-4 py-2 rounded-lg flex items-center gap-2
-                ${isGeneratingRoute 
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100"
+                ${
+                  isGeneratingRoute
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100"
                 }`}
             >
               <Truck className="h-4 w-4" />

@@ -60,7 +60,7 @@ function RouteMap({ route }) {
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      <div ref={mapRef} className="h-[600px] w-full" />
+      <div ref={mapRef} className="h-[400px] w-full" />
     </div>
   );
 }

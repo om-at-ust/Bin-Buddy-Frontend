@@ -117,11 +117,26 @@ export async function getLocationFromCoordinates(latitude, longitude) {
 
 export const generateRoute = async () => {
   try {
-    const response = await fetch("http://localhost:8085/api/routes/getRoute");
-    if (!response.ok) throw new Error("Failed to generate route");
-    return await response.json();
+    const response = await fetch(
+      "http://localhost:8085/api/routes/createRoute"
+    );
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to generate route: ${errorText}`);
+    }
+
+    const text = await response.text();
+    if (!text) {
+      throw new Error("Empty response received from server");
+    }
+
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      throw new Error(`Invalid JSON response: ${text}`);
+    }
   } catch (error) {
-    console.error("Error generating route:", error);
+    console.error("Error details:", error);
     throw error;
   }
 };
