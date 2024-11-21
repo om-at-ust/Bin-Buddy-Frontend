@@ -86,17 +86,17 @@ function Navbar() {
               </Link>
             )}
 
-            <Link
-              to="/raise-issue"
-              className={`nav-link group flex flex-col items-center 
-                text-gray-600 hover:text-green-700 transition-colors duration-300
-                ${
-                  isActiveLink("/raise-issue") && "text-green-700 font-semibold"
-                }`}
-            >
-              <AlertCircle className="w-5 h-5 mb-1" />
-              <span>Issue</span>
-            </Link>
+            {!isAdmin && (
+              <Link
+                to="/raise-issue"
+                className={`nav-link group flex flex-col items-center 
+                  text-gray-600 hover:text-green-700 transition-colors duration-300
+                  ${isActiveLink("/raise-issue") && "text-green-700 font-semibold"}`}
+              >
+                <AlertCircle className="w-5 h-5 mb-1" />
+                <span>Issue</span>
+              </Link>
+            )}
 
             {!isLoggedIn ? (
               <div className="flex items-center space-x-4">

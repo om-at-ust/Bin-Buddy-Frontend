@@ -16,6 +16,7 @@ import {
 import TruckModal from "../components/trucks/TruckModal";
 import TruckMap from "../components/trucks/TruckMap";
 import { toast } from "react-hot-toast";
+import { getRouteById } from "../services/routeService";
 
 function FleetManagement() {
   const [trucks, setTrucks] = useState([]);
@@ -24,10 +25,55 @@ function FleetManagement() {
   const [view, setView] = useState("list");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [routeDistances, setRouteDistances] = useState({});
 
   useEffect(() => {
     loadTrucks();
   }, []);
+
+  useEffect(() => {
+    const fetchRouteDistances = async () => {
+      console.log("Trucks data:", trucks);
+      const distances = {};
+      for (const truck of trucks) {
+        console.log("Current truck:", truck);
+        console.log("Route value:", truck.assignedRouteId);
+        
+        if (truck.assignedRouteId) {
+          try {
+            console.log("Fetching route for ID:", truck.assignedRouteId);
+            const routeData = await getRouteById(truck.assignedRouteId);
+            console.log("Route data received:", routeData);
+            
+            if (!routeData || !routeData.features || !routeData.features[0]) {
+              console.error("Invalid route data structure:", routeData);
+              distances[truck.assignedRouteId] = "N/A";
+              continue;
+            }
+
+            const distance = routeData.features[0]?.properties?.distance;
+            console.log("Raw distance value:", distance);
+            
+            if (distance !== undefined && distance !== null) {
+              const distanceInKm = (distance / 1000).toFixed(2);
+              distances[truck.assignedRouteId] = distanceInKm;
+            } else {
+              distances[truck.assignedRouteId] = "N/A";
+            }
+          } catch (error) {
+            console.error(`Failed to fetch route distance for ${truck.assignedRouteId}:`, error);
+            distances[truck.assignedRouteId] = "N/A";
+          }
+        }
+      }
+      console.log("Final distances object:", distances);
+      setRouteDistances(distances);
+    };
+
+    if (trucks.length > 0) {
+      fetchRouteDistances();
+    }
+  }, [trucks]);
 
   const loadTrucks = async () => {
     try {
@@ -257,17 +303,16 @@ function FleetManagement() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
+                      {console.log("Rendering truck:", truck)}
+                      {console.log("Current routeDistances:", routeDistances)}
                       {truck.assignedRouteId ? (
-                        <div className="flex items-center gap-2">
-                          <RouteIcon className="h-4 w-4 text-blue-500" />
-                          <span className="text-sm text-gray-900">
-                            Route #{truck.assignedRouteId}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-sm text-gray-500">
-                          No route assigned
+                        <span className="text-sm text-gray-900">
+                          {routeDistances[truck.assignedRouteId] 
+                            ? `${routeDistances[truck.assignedRouteId]} km`
+                            : "Loading..."}
                         </span>
+                      ) : (
+                        <span className="text-sm text-gray-500">No route assigned</span>
                       )}
                     </td>
                     <td className="px-6 py-4">

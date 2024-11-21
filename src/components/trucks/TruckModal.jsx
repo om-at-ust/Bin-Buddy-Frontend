@@ -119,7 +119,7 @@ function TruckModal({ isOpen, onClose, truck, onSave }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Current Location
+              Depot Name
             </label>
             <input
               type="text"

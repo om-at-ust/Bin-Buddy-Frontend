@@ -6,10 +6,7 @@ import {
   Route,
   Truck,
   Users,
-  BarChart3,
-  Bell,
-  Settings,
-  LogOut,
+  AlertCircle,
 } from "lucide-react";
 
 function AdminDashboard() {
@@ -53,23 +50,14 @@ function AdminDashboard() {
             <NavItem
               icon={<Users />}
               label="User Management"
-              to="/admin/users"
+              to="/user-management"
             />
             <NavItem
-              icon={<BarChart3 />}
-              label="Analytics"
-              to="/admin/analytics"
+              icon={<AlertCircle />}
+              label="Issue Management"
+              to="/issue-management"
             />
           </nav>
-
-          <div className="p-4 border-t border-gray-200">
-            <NavItem
-              icon={<Settings />}
-              label="Settings"
-              to="/admin/settings"
-            />
-            <NavItem icon={<LogOut />} label="Logout" to="/admin/logout" />
-          </div>
         </div>
       </aside>
 
@@ -82,23 +70,22 @@ function AdminDashboard() {
               <h1 className="text-2xl font-bold text-gray-900">
                 Dashboard Overview
               </h1>
-              <p className="text-gray-600">Welcome back, Admin</p>
+              <p className="text-gray-600">
+                Welcome back,{" "}
+                {JSON.parse(sessionStorage.getItem("user")).username}
+              </p>
             </div>
-            <div className="flex items-center gap-4">
-              <button className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 relative">
-                <Bell className="h-5 w-5 text-gray-600" />
-                <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
-              </button>
-              <div className="flex items-center gap-3">
-                <img
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                  alt="Admin profile"
-                  className="h-10 w-10 rounded-full object-cover"
-                />
-                <div>
-                  <p className="text-sm font-medium text-gray-700">John Doe</p>
-                  <p className="text-xs text-gray-500">Administrator</p>
-                </div>
+            <div className="flex items-center gap-3">
+              <img
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                alt="Admin profile"
+                className="h-10 w-10 rounded-full object-cover"
+              />
+              <div>
+                <p className="text-sm font-medium text-gray-700">
+                  {JSON.parse(sessionStorage.getItem("user")).username}
+                </p>
+                <p className="text-xs text-gray-500">Administrator</p>
               </div>
             </div>
           </div>
@@ -119,10 +106,10 @@ function AdminDashboard() {
               </h3>
               <div className="space-y-4">
                 {[
-                  { location: "Central Park", level: 90, status: "critical" },
-                  { location: "Main Street", level: 85, status: "warning" },
-                  { location: "Harbor View", level: 82, status: "warning" },
-                  { location: "West Avenue", level: 78, status: "warning" },
+                  { location: "Central Park", level: 90, status: "FULL" },
+                  { location: "Main Street", level: 85, status: "HALF_FULL" },
+                  { location: "Harbor View", level: 82, status: "HALF_FULL" },
+                  { location: "West Avenue", level: 78, status: "HALF_FULL" },
                 ].map((bin, index) => (
                   <BinLevelIndicator key={index} {...bin} />
                 ))}

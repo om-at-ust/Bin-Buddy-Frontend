@@ -1,5 +1,6 @@
 import Carousel from "../components/Carousel";
 import Footer from "../components/Footer";
+import RaiseIssueButton from "../components/RaiseIssueButton";
 
 function Home() {
   const images = [
@@ -125,12 +126,14 @@ function Home() {
             Recycling Best Practices
           </h2>
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-gradient-to-br from-eco-green-50 to-eco-green-100/50 
+            <div
+              className="bg-gradient-to-br from-eco-green-50 to-eco-green-100/50 
               rounded-lg shadow-md p-6 
               border border-eco-green-100
               hover:from-eco-green-100 hover:to-eco-green-200/50 
               hover:shadow-lg hover:scale-[1.01]
-              transition-all duration-300">
+              transition-all duration-300"
+            >
               <h3 className="text-xl font-semibold text-gray-800 mb-4">Do's</h3>
               <ul className="space-y-2 text-gray-600">
                 <li className="flex items-center">
@@ -155,12 +158,14 @@ function Home() {
                 </li>
               </ul>
             </div>
-            <div className="bg-gradient-to-br from-eco-green-50 to-eco-green-100/50 
+            <div
+              className="bg-gradient-to-br from-eco-green-50 to-eco-green-100/50 
               rounded-lg shadow-md p-6 
               border border-eco-green-100
               hover:from-eco-green-100 hover:to-eco-green-200/50 
               hover:shadow-lg hover:scale-[1.01]
-              transition-all duration-300">
+              transition-all duration-300"
+            >
               <h3 className="text-xl font-semibold text-gray-800 mb-4">
                 Don'ts
               </h3>
@@ -195,9 +200,11 @@ function Home() {
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
             Environmental Impact
           </h2>
-          <div className="bg-gradient-to-br from-eco-green-50 to-eco-green-100/50 
+          <div
+            className="bg-gradient-to-br from-eco-green-50 to-eco-green-100/50 
             rounded-lg shadow-md p-8 
-            border border-eco-green-100">
+            border border-eco-green-100"
+          >
             <div className="grid md:grid-cols-3 gap-6">
               <ImpactCard
                 title="Reduced Landfill"
@@ -219,18 +226,21 @@ function Home() {
         </section>
       </div>
       <Footer />
+      {sessionStorage.getItem("user") && <RaiseIssueButton />}
     </>
   );
 }
 
 function ServiceCard({ title, description }) {
   return (
-    <div className="bg-gradient-to-br from-eco-green-50 to-eco-green-100/50 
+    <div
+      className="bg-gradient-to-br from-eco-green-50 to-eco-green-100/50 
       rounded-lg shadow-md p-6 
       border border-eco-green-100
       hover:from-eco-green-100 hover:to-eco-green-200/50 
       hover:shadow-lg hover:scale-[1.02]
-      transition-all duration-300">
+      transition-all duration-300"
+    >
       <h3 className="text-xl font-semibold text-gray-800 mb-2">{title}</h3>
       <p className="text-gray-600">{description}</p>
     </div>
@@ -239,16 +249,20 @@ function ServiceCard({ title, description }) {
 
 function WasteGuideCard({ title, items, color }) {
   const colorClasses = {
-    green: "border-green-500 bg-gradient-to-br from-eco-green-50 to-eco-green-100/50",
-    yellow: "border-yellow-500 bg-gradient-to-br from-yellow-50 to-yellow-100/50",
+    green:
+      "border-green-500 bg-gradient-to-br from-eco-green-50 to-eco-green-100/50",
+    yellow:
+      "border-yellow-500 bg-gradient-to-br from-yellow-50 to-yellow-100/50",
     red: "border-red-500 bg-gradient-to-br from-red-50 to-red-100/50",
   };
 
   return (
-    <div className={`rounded-lg shadow-md p-6 border-l-4 
+    <div
+      className={`rounded-lg shadow-md p-6 border-l-4 
       ${colorClasses[color]}
       hover:shadow-lg hover:scale-[1.01]
-      transition-all duration-300`}>
+      transition-all duration-300`}
+    >
       <h3 className="text-xl font-semibold text-gray-800 mb-4">{title}</h3>
       <ul className="space-y-2">
         {items.map((item, index) => (
@@ -264,12 +278,14 @@ function WasteGuideCard({ title, items, color }) {
 
 function ImpactCard({ title, value, description }) {
   return (
-    <div className="text-center p-4 
+    <div
+      className="text-center p-4 
       bg-white/50
       rounded-lg border border-eco-green-100
       hover:bg-white/70
       hover:shadow-lg hover:scale-[1.02]
-      transition-all duration-300">
+      transition-all duration-300"
+    >
       <h3 className="text-xl font-semibold text-gray-800 mb-2">{title}</h3>
       <div className="text-4xl font-bold text-green-600 mb-2">{value}</div>
       <p className="text-gray-600">{description}</p>

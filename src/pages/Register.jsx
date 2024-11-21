@@ -36,7 +36,7 @@ function Register() {
     try {
       // Register the user
       const registerResponse = await fetch(
-        "http://localhost:8222/api/auth/register",
+        "http://localhost:8081/api/auth/register",
         {
           method: "POST",
           headers: {

@@ -83,3 +83,15 @@ export const setRouteStatusAssigned = async (routeId) => {
     throw error;
   }
 };
+
+export const getRouteById = async (id) => {
+  try {
+    const response = await fetch(`${BASE_URL}/routes/${id}`);
+    if (!response.ok) {
+      throw new Error("Failed to fetch route");
+    }
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+};

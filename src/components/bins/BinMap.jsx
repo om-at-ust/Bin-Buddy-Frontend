@@ -40,7 +40,7 @@ function BinMap({ bins, onBinClick }) {
   }, [map]);
 
   return (
-    <div className="h-[600px] bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div className="h-[400px] mx-auto max-w-5xl bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <MapContainer
         center={center}
         zoom={13}
@@ -52,13 +52,7 @@ function BinMap({ bins, onBinClick }) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         {bins.map((bin) => (
-          <Marker
-            key={bin.id}
-            position={[bin.latitude, bin.longitude]}
-            eventHandlers={{
-              click: () => onBinClick(bin),
-            }}
-          >
+          <Marker key={bin.id} position={[bin.latitude, bin.longitude]}>
             <Popup>
               <div className="p-2">
                 <h3 className="font-semibold">{bin.location}</h3>
