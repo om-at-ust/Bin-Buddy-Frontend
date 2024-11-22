@@ -13,6 +13,7 @@ import FleetManagement from "./pages/FleetManagement";
 import UserManagement from "./pages/UserManagement";
 import IssueForm from "./components/IssueForm";
 import IssueManagement from "./pages/IssueManagement";
+import UserIssues from "./pages/UserIssues";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
             <Route path="/user-management" element={<UserManagement />} />
             <Route path="/raise-issue" element={<IssueForm />} />
             <Route path="/issue-management" element={<IssueManagement />} />
+            <Route path="/user-issues" element={<UserIssues />} />
           </Routes>
         </div>
       </Router>

@@ -7,6 +7,7 @@ import {
   MapPin,
   AlertCircle,
   Truck,
+  RefreshCw,
 } from "lucide-react";
 import BinModal from "../components/bins/BinModal";
 import BinMap from "../components/bins/BinMap";
@@ -28,6 +29,7 @@ function BinManagement() {
   const [showOnlyFull, setShowOnlyFull] = useState(false);
   const [isGeneratingRoute, setIsGeneratingRoute] = useState(false);
   const [routeData, setRouteData] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const navigate = useNavigate();
   useEffect(() => {
     loadBins();
@@ -35,11 +37,15 @@ function BinManagement() {
 
   const loadBins = async () => {
     try {
+      setIsRefreshing(true);
       const data = await fetchBins();
       setBins(data);
       setShowOnlyFull(false);
     } catch (error) {
       console.error("Error loading bins:", error);
+      toast.error("Failed to refresh bins");
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -59,13 +65,13 @@ function BinManagement() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this bin?")) {
-      try {
-        await deleteBin(id);
-        loadBins();
-      } catch (error) {
-        console.error("Error deleting bin:", error);
-      }
+    try {
+      await deleteBin(id);
+      toast.success("Bin deleted successfully");
+      loadBins();
+    } catch (error) {
+      console.error("Error deleting bin:", error);
+      toast.error("Failed to delete bin");
     }
   };
 
@@ -96,16 +102,26 @@ function BinManagement() {
             Manage and monitor waste bins across the city
           </p>
         </div>
-        <button
-          onClick={() => {
-            setSelectedBin(null);
-            setIsModalOpen(true);
-          }}
-          className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700 transition-colors"
-        >
-          <Plus className="h-5 w-5" />
-          Add New Bin
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={loadBins}
+            disabled={isRefreshing}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors disabled:bg-blue-400"
+          >
+            <RefreshCw className={`h-5 w-5 ${isRefreshing ? "animate-spin" : ""}`} />
+            Refresh
+          </button>
+          <button
+            onClick={() => {
+              setSelectedBin(null);
+              setIsModalOpen(true);
+            }}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700 transition-colors"
+          >
+            <Plus className="h-5 w-5" />
+            Add New Bin
+          </button>
+        </div>
       </div>
 
       {/* Controls */}
@@ -232,7 +248,7 @@ function BinManagement() {
                         </button>
                         <button
                           onClick={() => handleDelete(bin.id)}
-                          className="text-gray-400 hover:text-red-600"
+                          className="text-gray-400 hover:text-red-600 transition-colors duration-200"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -302,15 +318,25 @@ function StatusBadge({ status }) {
   };
 
   const formatStatus = (status) => {
-    return status
-      ?.toLowerCase()
-      .replace(/_/g, " ") // Replace all underscores with spaces
-      .replace(/\b\w/g, (c) => c.toUpperCase()); // Capitalize first letter of each word
+    switch (status) {
+      case "QUARTERLY_FULL":
+        return "Quarter Full";
+      case "HALF_FULL":
+        return "Half Full";
+      case "FULL":
+        return "Full";
+      case "OVERFLOWING":
+        return "Overflowing";
+      case "EMPTY":
+        return "Empty";
+      default:
+        return status;
+    }
   };
 
   return (
     <span
-      className={`text-xs px-2 py-1 rounded-full border ${getStatusStyles()}`}
+      className={`inline-flex whitespace-nowrap text-xs px-2 py-1 rounded-full border ${getStatusStyles()}`}
     >
       {formatStatus(status)}
     </span>

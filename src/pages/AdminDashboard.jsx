@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, Outlet } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -8,14 +8,98 @@ import {
   Users,
   AlertCircle,
 } from "lucide-react";
+import { fetchBins } from "../services/binService";
+import { getAllRoutes } from "../services/routeService";
+import { getAllTrucks } from "../services/truckService";
 
 function AdminDashboard() {
-  const stats = [
-    { label: "Active Bins", value: "245", change: "+12%", trend: "up" },
-    { label: "Routes Today", value: "18", change: "+5%", trend: "up" },
-    { label: "Active Trucks", value: "12", change: "stable", trend: "neutral" },
-    { label: "Waste Collected", value: "4.2T", change: "+8%", trend: "up" },
-  ];
+  const [stats, setStats] = useState({
+    activeBins: 0,
+    routesToday: 0,
+    activeTrucks: 0,
+    wasteCollected: 0
+  });
+  const [criticalBins, setCriticalBins] = useState([]);
+  const [activeRoutes, setActiveRoutes] = useState([]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      // Fetch all data in parallel with error handling for each request
+      const [binsResponse, routesResponse, trucksResponse] = await Promise.all([
+        fetchBins().catch(error => {
+          console.error("Error fetching bins:", error);
+          return [];
+        }),
+        getAllRoutes().catch(error => {
+          console.error("Error fetching routes:", error);
+          return [];
+        }),
+        getAllTrucks().catch(error => {
+          console.error("Error fetching trucks:", error);
+          return [];
+        })
+      ]);
+
+      // Safely handle the data with default values
+      const binsData = Array.isArray(binsResponse) ? binsResponse : [];
+      const routesData = Array.isArray(routesResponse) ? routesResponse : [];
+      const trucksData = Array.isArray(trucksResponse) ? trucksResponse : [];
+
+      // Calculate stats with safe defaults
+      const activeBinsCount = binsData.length;
+      const totalWaste = binsData.reduce((sum, bin) => {
+        const wasteAmount = Number(bin?.wasteAmount) || 0;
+        return sum + wasteAmount;
+      }, 0);
+      const activeTrucksCount = trucksData.filter(truck => 
+        truck?.status === 'ON_ROUTE'
+      ).length;
+
+      // Update stats with safe defaults
+      setStats({
+        activeBins: activeBinsCount || 0,
+        routesToday: routesData.length || 0,
+        activeTrucks: activeTrucksCount || 0,
+        wasteCollected: `${(totalWaste / 1000).toFixed(1)}T` // Converting to tons
+      });
+
+      // Get critical bins (fill level > 75%)
+      const criticalBinsData = binsData
+        .filter(bin => bin.fillLevel > 75)
+        .sort((a, b) => b.fillLevel - a.fillLevel)
+        .slice(0, 4)
+        .map(bin => ({
+          location: bin.location,
+          level: bin.fillLevel,
+          status: bin.fillLevel >= 90 ? "FULL" : "HALF_FULL"
+        }));
+      setCriticalBins(criticalBinsData);
+
+      // Modified active routes mapping
+      const activeRoutesData = routesData
+        .slice(0, 4)
+        .map((route, index) => {
+          const assignedTruck = trucksData.find(truck => 
+            truck?.assignedRouteId === route?.id
+          );
+          return {
+            route: `Active Route ${index + 1}`,
+            driver: assignedTruck?.userId ? `Driver ${assignedTruck.userId}` : `Driver ${index + 1}`,
+            progress: Math.floor(Math.random() * 100),
+            status: "on-time"
+          };
+        });
+      setActiveRoutes(activeRoutesData);
+
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+      // You might want to add error handling/display here
+    }
+  };
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -92,25 +176,25 @@ function AdminDashboard() {
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {stats.map((stat, index) => (
+            {[
+              { label: "Active Bins", value: stats.activeBins },
+              { label: "Routes Today", value: stats.routesToday },
+              { label: "Active Trucks", value: stats.activeTrucks },
+              { label: "Waste Collected", value: stats.wasteCollected }
+            ].map((stat, index) => (
               <StatCard key={index} {...stat} />
             ))}
           </div>
 
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Bin Fill Levels */}
+            {/* Critical Bin Levels */}
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Critical Bin Levels
               </h3>
               <div className="space-y-4">
-                {[
-                  { location: "Central Park", level: 90, status: "FULL" },
-                  { location: "Main Street", level: 85, status: "HALF_FULL" },
-                  { location: "Harbor View", level: 82, status: "HALF_FULL" },
-                  { location: "West Avenue", level: 78, status: "HALF_FULL" },
-                ].map((bin, index) => (
+                {criticalBins.map((bin, index) => (
                   <BinLevelIndicator key={index} {...bin} />
                 ))}
               </div>
@@ -122,32 +206,7 @@ function AdminDashboard() {
                 Active Routes
               </h3>
               <div className="space-y-4">
-                {[
-                  {
-                    route: "Route A-1",
-                    driver: "Mike Johnson",
-                    progress: 75,
-                    status: "on-time",
-                  },
-                  {
-                    route: "Route B-3",
-                    driver: "Sarah Wilson",
-                    progress: 45,
-                    status: "delayed",
-                  },
-                  {
-                    route: "Route C-2",
-                    driver: "Tom Davis",
-                    progress: 90,
-                    status: "on-time",
-                  },
-                  {
-                    route: "Route D-4",
-                    driver: "Emma Brown",
-                    progress: 30,
-                    status: "on-time",
-                  },
-                ].map((route, index) => (
+                {activeRoutes.map((route, index) => (
                   <RouteProgressBar key={index} {...route} />
                 ))}
               </div>

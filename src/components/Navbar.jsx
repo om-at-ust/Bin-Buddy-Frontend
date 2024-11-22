@@ -79,7 +79,9 @@ function Navbar() {
                 to="/admin/dashboard"
                 className={`nav-link group flex flex-col items-center 
                   text-gray-600 hover:text-green-700 transition-colors duration-300
-                  ${isActiveLink("/dashboard") && "text-green-700 font-semibold"}`}
+                  ${
+                    isActiveLink("/dashboard") && "text-green-700 font-semibold"
+                  }`}
               >
                 <LayoutDashboard className="w-5 h-5 mb-1" />
                 <span>Dashboard</span>
@@ -88,13 +90,16 @@ function Navbar() {
 
             {!isAdmin && (
               <Link
-                to="/raise-issue"
+                to="/user-issues"
                 className={`nav-link group flex flex-col items-center 
                   text-gray-600 hover:text-green-700 transition-colors duration-300
-                  ${isActiveLink("/raise-issue") && "text-green-700 font-semibold"}`}
+                  ${
+                    isActiveLink("/raise-issue") &&
+                    "text-green-700 font-semibold"
+                  }`}
               >
                 <AlertCircle className="w-5 h-5 mb-1" />
-                <span>Issue</span>
+                <span>Raised Issues</span>
               </Link>
             )}
 

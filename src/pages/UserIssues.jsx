@@ -6,6 +6,7 @@ import {
   Search,
   ChevronDown,
   ChevronUp,
+  RefreshCw,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-hot-toast";
@@ -14,6 +15,7 @@ function UserIssues() {
   const { username } = useAuth();
   const [issues, setIssues] = useState([]);
   const [expandedDescriptions, setExpandedDescriptions] = useState({});
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (username) {
@@ -22,13 +24,19 @@ function UserIssues() {
   }, [username]);
 
   const loadUserIssues = async () => {
+    setLoading(true);
     try {
-      const response = await fetch(`/api/issues/user/${username}`);
+      const response = await fetch(
+        `http://localhost:8084/issues/user/${username}`
+      );
       const data = await response.json();
       setIssues(data);
+      toast.success("Issues refreshed successfully");
     } catch (error) {
       console.error("Error loading issues:", error);
       toast.error("Failed to load issues");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -41,11 +49,25 @@ function UserIssues() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">My Issues</h1>
-        <p className="text-gray-600">
-          Track the status of your reported issues
-        </p>
+      <div className="mb-8 flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Issues</h1>
+          <p className="text-gray-600">
+            Track the status of your reported issues
+          </p>
+        </div>
+        <button
+          onClick={loadUserIssues}
+          disabled={loading}
+          className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 
+            text-white rounded-lg transition-colors duration-200 ease-in-out 
+            disabled:bg-green-400 disabled:cursor-not-allowed shadow-sm"
+        >
+          <RefreshCw
+            className={`h-5 w-5 mr-2 ${loading ? 'animate-spin' : ''}`}
+          />
+          Refresh
+        </button>
       </div>
 
       <div className="space-y-6">

@@ -7,6 +7,7 @@ import {
   Eye,
   Trash2,
   AlertCircle,
+  RefreshCw,
 } from "lucide-react";
 import RouteMap from "../components/routes/RouteMap";
 import { useNavigate } from "react-router-dom";
@@ -26,6 +27,7 @@ function RouteManagement() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [filterStatus, setFilterStatus] = useState("all"); // 'all', 'assigned', 'unassigned'
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     fetchRoutes();
@@ -47,32 +49,36 @@ function RouteManagement() {
       });
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   };
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchRoutes();
+  };
+
   const handleDeleteRoute = async (id) => {
-    if (window.confirm("Are you sure you want to delete this route?")) {
-      try {
-        await deleteRoute(id);
-        toast.success("Route deleted successfully", {
-          duration: 4000,
-          position: "top-right",
-          style: {
-            background: "#10B981",
-            color: "#FFFFFF",
-          },
-        });
-        fetchRoutes();
-      } catch (error) {
-        toast.error("Failed to delete route", {
-          duration: 4000,
-          position: "top-right",
-          style: {
-            background: "#EF4444",
-            color: "#FFFFFF",
-          },
-        });
-      }
+    try {
+      await deleteRoute(id);
+      toast.success("Route deleted successfully", {
+        duration: 4000,
+        position: "top-right",
+        style: {
+          background: "#10B981",
+          color: "#FFFFFF",
+        },
+      });
+      handleRefresh();
+    } catch (error) {
+      toast.error("Failed to delete route", {
+        duration: 4000,
+        position: "top-right",
+        style: {
+          background: "#EF4444",
+          color: "#FFFFFF",
+        },
+      });
     }
   };
 
@@ -123,7 +129,7 @@ function RouteManagement() {
           },
         });
         fetchRoutes();
-        navigate("/admin/dashboard/fleet-management");
+        navigate("/fleet-management");
       } else {
         toast.error("Failed to assign route to truck", {
           duration: 4000,
@@ -169,14 +175,28 @@ function RouteManagement() {
             Manage and monitor waste collection routes
           </p>
         </div>
-        {view === "map" && (
-          <button
-            onClick={() => setView("list")}
-            className="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-200 transition-colors"
-          >
-            Back to List
-          </button>
-        )}
+        <div className="flex gap-4">
+          {view === "map" && (
+            <button
+              onClick={() => setView("list")}
+              className="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-200 transition-colors"
+            >
+              Back to List
+            </button>
+          )}
+          {view === "list" && (
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700 transition-colors disabled:bg-green-400"
+            >
+              <RefreshCw
+                className={`h-5 w-5 ${isRefreshing ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Filter Buttons - Only visible in list view */}
